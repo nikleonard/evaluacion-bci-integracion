@@ -10,16 +10,15 @@ import cl.bci.evaluacion.model.entity.Phone;
 import cl.bci.evaluacion.model.entity.User;
 import cl.bci.evaluacion.repository.UserRepository;
 import cl.bci.evaluacion.util.JwtUtil;
+import cl.bci.evaluacion.util.PasswordEncoder;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-
-    public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
-        this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponseDTO registerUser(UserRequestDTO request) {
         // Chequear email
@@ -30,11 +29,14 @@ public class UserService {
         // Generar token JWT con claim de rol usuario
         String token = jwtUtil.generateJWT(request.getEmail());
 
+        // Encriptar password con bCrypt
+        String encryptedPassword = passwordEncoder.encode(request.getPassword());
+
         // Crear usuario
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(encryptedPassword)
                 .token(token)
                 .phones(request.getPhones().stream()
                         .map(phoneDTO -> Phone.builder()

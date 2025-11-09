@@ -10,6 +10,7 @@ Esta aplicación proporciona un único endpoint REST para el registro de usuario
 - Genera tokens JWT para autenticación de cada usuario
 - Almacena información del usuario con timestamps
 - Asocia múltiples números de teléfono con cada usuario
+- La contraseña es encriptada con bCrypt en la base de datos, por lo que esta no debe superar los 70 caracteres (el límite de Bcrypt.hashpw es 72 caracteres)
 
 ## Stack Tecnológico
 
@@ -21,6 +22,7 @@ Esta aplicación proporciona un único endpoint REST para el registro de usuario
 - **Lombok** para reducir código repetitivo
 - **JUnit 5** para pruebas
 - **SpringDoc OpenAPI** para documentación de API (Swagger)
+- **Spring Security Crypto** para encriptación de claves
 
 ## Estructura del Proyecto
 
@@ -132,7 +134,7 @@ spring.h2.console.path=/h2-console
 **Nota**: El campo `token` contiene un JWT (JSON Web Token) con:
 - **Subject**: Email del usuario
 - **Claim "rol"**: "usuario"
-- **Algoritmo**: HS512
+- **Algoritmo**: HS256
 - **Expiración**: 24 horas (configurable)
 
 #### Respuesta de Error (400 Bad Request)

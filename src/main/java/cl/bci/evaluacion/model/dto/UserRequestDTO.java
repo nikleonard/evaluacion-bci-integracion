@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import org.hibernate.validator.constraints.Length;
+
 import cl.bci.evaluacion.validation.ValidEmail;
 import cl.bci.evaluacion.validation.ValidPassword;
 
@@ -27,6 +29,7 @@ public class UserRequestDTO {
 
     @NotBlank(message = "La contraseña es requerida")
     @ValidPassword(message = "Formato de contraseña inválido")
+    @Length(max = 70, message = "La contraseña no debe exceder los 70 caracteres")
     private String password;
 
     @NotEmpty(message = "Al menos un teléfono es requerido")
