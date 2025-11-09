@@ -3,7 +3,9 @@ package cl.bci.evaluacion.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
     @Value("${validation.email.pattern}")
     private String pattern;

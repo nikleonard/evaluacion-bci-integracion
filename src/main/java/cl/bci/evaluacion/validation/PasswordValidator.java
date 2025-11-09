@@ -3,7 +3,9 @@ package cl.bci.evaluacion.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PasswordValidator implements ConstraintValidator<ValidPassword, String> {
     @Value("${validation.password.pattern}")
     private String pattern;
