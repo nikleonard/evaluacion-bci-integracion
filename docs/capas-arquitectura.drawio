@@ -1,0 +1,54 @@
+<mxfile host="65bd71144e">
+    <diagram name="Capas Arquitectura" id="0">
+        <mxGraphModel dx="2026" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="Cliente" value="Cliente externo&#xa;(Frontend / consumidor)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="162.84" width="30" height="57.16" as="geometry"/>
+                </mxCell>
+                <mxCell id="App" value="Aplicación Spring Boot" style="rounded=1;whiteSpace=wrap;strokeColor=#1E88E5;fillColor=#E3F2FD;fontStyle=1;verticalAlign=top;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="120" width="590" height="450" as="geometry"/>
+                </mxCell>
+                <mxCell id="Presentacion" value="Capa de Presentación&#xa;Controlador REST" style="rounded=1;whiteSpace=wrap;fillColor=#BBDEFB;strokeColor=#0D47A1;fontStyle=0" parent="App" vertex="1">
+                    <mxGeometry x="232.5893421052632" y="42.04" width="124.82381578947367" height="58.76" as="geometry"/>
+                </mxCell>
+                <mxCell id="Servicio" value="Capa de Servicio&#xa;Reglas de negocio / UserService" style="rounded=1;whiteSpace=wrap;fillColor=#C8E6C9;strokeColor=#2E7D32;" parent="App" vertex="1">
+                    <mxGeometry x="227.12125000000003" y="140" width="135.76" height="68.3" as="geometry"/>
+                </mxCell>
+                <mxCell id="Validacion" value="Capa de Validación&#xa;EmailValidator / PasswordValidator" style="rounded=1;whiteSpace=wrap;fillColor=#DCEDC8;strokeColor=#558B2F;" parent="App" vertex="1">
+                    <mxGeometry x="49.995555555555555" y="245.45454545454544" width="159.2063492063492" height="71.04886363636363" as="geometry"/>
+                </mxCell>
+                <mxCell id="Persistencia" value="Capa de Persistencia&#xa;UserRepository (Spring Data JPA)" style="rounded=1;whiteSpace=wrap;fillColor=#FFF3E0;strokeColor=#F57C00;" parent="App" vertex="1">
+                    <mxGeometry x="192.21013888888893" y="337.5" width="205.5822222222222" height="82.89204545454545" as="geometry"/>
+                </mxCell>
+                <mxCell id="EdgePS" value="DTO solicitud/respuesta" parent="App" source="Presentacion" target="Servicio" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="EdgeSV" value="Reglas de validación" parent="App" source="Servicio" target="Validacion" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="EdgeSP" value="Operaciones de dominio" parent="App" source="Servicio" target="Persistencia" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="DTOs" value="DTOs y Entidades&#xa;(UserRequestDTO, User, Phone)" style="rounded=1;whiteSpace=wrap;fillColor=#FFFDE7;strokeColor=#F9A825;" parent="App" vertex="1">
+                    <mxGeometry x="390.00317460317456" y="245.45454545454544" width="168.57142857142856" height="71.04886363636363" as="geometry"/>
+                </mxCell>
+                <mxCell id="EdgeSD" value="Mapeo entidad/DTO" parent="App" source="Servicio" target="DTOs" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="EdgeC" value="HTTP POST (JSON) /api/users" parent="1" source="Cliente" target="Presentacion" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="EdgePD" value="Consultas SQL/JPA" parent="1" source="Persistencia" target="2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="910" y="499.8044160844838" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="2" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;Base de Datos H2&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;Esquema users/phones&lt;/span&gt;&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;" vertex="1" parent="1">
+                    <mxGeometry x="910" y="460" width="100" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

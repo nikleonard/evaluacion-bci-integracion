@@ -8,6 +8,7 @@ class EvaluacionApplicationTests {
 
 	@Test
 	void contextLoads() {
+		//Test por defecto para chequear contexto SpringBootTest
 	}
 
 }

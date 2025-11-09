@@ -1,0 +1,54 @@
+<mxfile host="65bd71144e">
+    <diagram name="Arquitectura Registro Usuarios" id="0">
+        <mxGraphModel dx="936" dy="638" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="Cliente" value="Cliente externo" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="155.56" width="80" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="API" value="API de Registro (Spring Boot)" style="rounded=1;glass=0;whiteSpace=wrap;strokeColor=#1565C0;fillColor=#E3F2FD;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="130" width="710" height="440" as="geometry"/>
+                </mxCell>
+                <mxCell id="Controller" value="Controlador REST&#xa;/api/users" style="rounded=1;whiteSpace=wrap;fillColor=#BBDEFB;strokeColor=#0D47A1;" parent="API" vertex="1">
+                    <mxGeometry x="40.97" y="36.67" width="99.03" height="97.78" as="geometry"/>
+                </mxCell>
+                <mxCell id="Service" value="Servicio de Usuarios&#xa;(Reglas de negocio)" style="rounded=1;whiteSpace=wrap;fillColor=#BBDEFB;strokeColor=#0D47A1;" parent="API" vertex="1">
+                    <mxGeometry x="286.73" y="36.67" width="133.27" height="97.78" as="geometry"/>
+                </mxCell>
+                <mxCell id="Validation" value="Validadores&#xa;Email / Password" style="rounded=1;whiteSpace=wrap;fillColor=#E8F5E9;strokeColor=#1B5E20;" parent="API" vertex="1">
+                    <mxGeometry x="570" y="36.67" width="117.46" height="97.78" as="geometry"/>
+                </mxCell>
+                <mxCell id="Repository" value="Repositorio JPA&#xa;(UserRepository)" style="rounded=1;whiteSpace=wrap;fillColor=#FFF3E0;strokeColor=#E65100;" parent="API" vertex="1">
+                    <mxGeometry x="58.84307692307691" y="270.00111111111113" width="245.76923076923075" height="97.77777777777779" as="geometry"/>
+                </mxCell>
+                <mxCell id="DTOs" value="DTOs / Entidades&#xa;(User, Phone, UserDTO)" style="rounded=1;whiteSpace=wrap;fillColor=#FFF8E1;strokeColor=#F9A825;" parent="API" vertex="1">
+                    <mxGeometry x="570.85" y="270" width="115.76" height="97.78" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge3" value="Operaciones CRUD" parent="API" source="DTOs" target="Repository" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge6" value="Mapeo entidad/DTO" parent="API" source="Validation" target="DTOs" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge1" value="Solicitudes HTTPS" parent="1" source="Cliente" target="Controller" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge2" value="DTO solicitud/respuesta" parent="1" source="Controller" target="Service" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge4" value="Reglas de validación" parent="1" source="Service" target="Validation" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge5" value="Consultas SQL (JPA)" style="entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="Repository" target="2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="441.7293300217266" y="620" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="2" value="H2 (en memoria)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+                    <mxGeometry x="397.5926923076923" y="610" width="88.27" height="100" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
