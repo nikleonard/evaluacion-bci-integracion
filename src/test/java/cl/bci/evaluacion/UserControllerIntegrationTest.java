@@ -7,13 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,6 +35,9 @@ class UserControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @BeforeEach
     void setUp() {
@@ -67,7 +73,7 @@ class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.isactive").value(true))
                 .andExpect(jsonPath("$.phones[0].number").value("1234567"))
                 .andExpect(jsonPath("$.phones[0].citycode").value("1"))
-                .andExpect(jsonPath("$.phones[0].countrycode").value("57"));
+                .andExpect(jsonPath("$.phones[0].contrycode").value("57"));
     }
 
     /**
@@ -251,5 +257,44 @@ class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.phones.length()").value(2))
                 .andExpect(jsonPath("$.phones[0].number").value("1234567"))
                 .andExpect(jsonPath("$.phones[1].number").value("9876543"));
+    }
+
+    /**
+     * Test para validar que el token JWT se genera correctamente.
+     * Verifica que:
+     * - El token no es nulo ni vacío
+     * - El token tiene el formato JWT (tres partes separadas por puntos)
+     */
+    @Test
+    void testRegisterUserGeneratesValidJWT() throws Exception {
+        UserRequestDTO request = UserRequestDTO.builder()
+                .name("Juan Rodriguez")
+                .email("juan@rodriguez.org")
+                .password("SecurePass123")
+                .phones(List.of(
+                        PhoneDTO.builder()
+                                .number("1234567")
+                                .citycode("1")
+                                .countrycode("57")
+                                .build()
+                ))
+                .build();
+
+        MvcResult result = mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token").exists())
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andReturn();
+
+        // Extraer token de la respuesta
+        String response = result.getResponse().getContentAsString();
+        String token = objectMapper.readTree(response).get("token").asText();
+
+        // Validar formato JWT (tres partes separadas por puntos)
+        String[] parts = token.split("\\.");
+        assertThat(parts).hasSize(3);
+        assertThat(token).isNotBlank();
     }
 }

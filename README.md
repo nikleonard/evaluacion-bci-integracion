@@ -7,7 +7,7 @@ API REST de Spring Boot 3.5.7 para el registro de usuarios con base de datos H2 
 Esta aplicación proporciona un único endpoint REST para el registro de usuarios que:
 - Valida los datos del usuario (formatos de correo y contraseña)
 - Previene el registro duplicado de correos
-- Genera tokens únicos para cada usuario
+- Genera tokens JWT para autenticación de cada usuario
 - Almacena información del usuario con timestamps
 - Asocia múltiples números de teléfono con cada usuario
 
@@ -16,6 +16,7 @@ Esta aplicación proporciona un único endpoint REST para el registro de usuario
 - **Java 21** con Spring Boot 3.5.7
 - **Spring Data JPA** para persistencia
 - **Base de Datos H2** (en memoria)
+- **JWT (JSON Web Tokens)** para generación de tokens de autenticación
 - **Gradle** como sistema de construcción
 - **Lombok** para reducir código repetitivo
 - **JUnit 5** para pruebas
@@ -25,31 +26,41 @@ Esta aplicación proporciona un único endpoint REST para el registro de usuario
 
 ```
 src/main/java/cl/bci/evaluacion/
-├── controller/               # Endpoints REST
-│   └── UserController.java
-├── service/                  # Lógica de negocio
-│   └── UserService.java
-├── repository/               # Capa de acceso a datos
-│   └── UserRepository.java
+├── controller/
+│   └── UserController.java              # Endpoints REST para registro de usuarios
+├── service/
+│   └── UserService.java                 # Lógica de negocio de usuarios
+├── repository/
+│   └── UserRepository.java              # Interfaz JPA para acceso a datos
 ├── model/
-│   ├── entity/              # Entidades JPA
-│   │   ├── User.java
-│   │   └── Phone.java
-│   └── dto/                 # DTOs de Solicitud/Respuesta
-│       ├── UserRequestDTO.java
-│       ├── UserResponseDTO.java
-│       └── PhoneDTO.java
-├── validation/              # Validadores personalizados
-│   ├── ValidEmail.java
-│   ├── EmailValidator.java
-│   ├── ValidPassword.java
-│   └── PasswordValidator.java
-├── config/                  # Configuración
-│   └── OpenApiConfiguration.java
-├── exception/               # Manejo de excepciones
-│   ├── DuplicateEmailException.java
-│   └── GlobalExceptionHandler.java
-└── EvaluacionApplication.java
+│   ├── entity/
+│   │   ├── User.java                    # Entidad JPA para usuarios
+│   │   └── Phone.java                   # Entidad JPA para teléfonos
+│   └── dto/
+│       ├── UserRequestDTO.java          # DTO para solicitud de registro
+│       ├── UserResponseDTO.java         # DTO para respuesta de usuario
+│       └── PhoneDTO.java                # DTO para teléfonos
+├── validation/
+│   ├── ValidEmail.java                  # Anotación para validación de email
+│   ├── EmailValidator.java              # Implementación de validador de email
+│   ├── ValidPassword.java               # Anotación para validación de contraseña
+│   └── PasswordValidator.java           # Implementación de validador de contraseña
+├── util/
+│   └── JwtUtil.java                     # Utilidad para generación de tokens JWT
+├── config/
+│   └── OpenApiConfiguration.java        # Configuración de Swagger/OpenAPI
+├── exception/
+│   ├── DuplicateEmailException.java     # Excepción para correos duplicados
+│   └── GlobalExceptionHandler.java      # Manejo global de excepciones
+└── EvaluacionApplication.java           # Clase principal de Spring Boot
+
+src/main/resources/
+├── application.properties                # Configuración de la aplicación
+└── schema.sql                            # Esquema de base de datos
+
+docs/
+├── arquitectura.drawio                   # Diagrama de arquitectura general
+└── capas-arquitectura.drawio             # Diagrama de capas arquitectónicas
 ```
 
 ## Configuración
@@ -62,6 +73,10 @@ validation.email.pattern=^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$
 
 # Patrón de contraseña - por defecto: 8+ caracteres con mayúscula y número
 validation.password.pattern=^(?=.*[A-Z])(?=.*[0-9]).{8,}$
+
+# JWT - Configuración de tokens
+jwt.secret=mi_clave_secreta_super_segura_para_jwt_que_debe_ser_larga_y_compleja_123456789
+jwt.expiration=86400000
 
 # Consola H2 (para desarrollo)
 spring.h2.console.enabled=true
@@ -102,7 +117,7 @@ spring.h2.console.path=/h2-console
   "created": "2025-11-07T23:30:00",
   "modified": "2025-11-07T23:30:00",
   "last_login": "2025-11-07T23:30:00",
-  "token": "a1b2c3d4-e5f6-4789-0123-456789abcdef",
+  "token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqdWFuQHJvZHJpZ3Vlei5vcmciLCJyb2wiOiJ1c3VhcmlvIiwiaWF0IjoxNzMxMTM0MjAwLCJleHAiOjE3MzEyMjA2MDB9.xyz...",
   "isactive": true,
   "phones": [
     {
@@ -113,6 +128,12 @@ spring.h2.console.path=/h2-console
   ]
 }
 ```
+
+**Nota**: El campo `token` contiene un JWT (JSON Web Token) con:
+- **Subject**: Email del usuario
+- **Claim "rol"**: "usuario"
+- **Algoritmo**: HS512
+- **Expiración**: 24 horas (configurable)
 
 #### Respuesta de Error (400 Bad Request)
 
@@ -224,7 +245,7 @@ H2 en memoria con creación automática de tablas:
 - created (timestamp)
 - modified (timestamp)
 - last_login (timestamp)
-- token (varchar)
+- token (varchar) - almacena JWT
 - is_active (boolean)
 
 **Tabla phones**
@@ -258,7 +279,9 @@ H2 en memoria con creación automática de tablas:
 
 ## Notas
 
-- La falta de ortografía "contrycode" y el mensaje de error "El correo ya registrado" se usan acorde al docunento de especificaciones entregado para evitar inconsistencias, pero internamente el campo es llamado correctamente countryCode.
+- La falta de ortografía "contrycode" y el mensaje de error "El correo ya registrado" se usan acorde al documento de especificaciones entregado para evitar inconsistencias, pero internamente el campo es llamado correctamente countryCode.
+- Los tokens JWT se generan con el email del usuario como subject y un claim "rol" con valor "usuario".
+- La clave secreta JWT (`jwt.secret`) debe cambiarse en producción por una clave más robusta y segura.
 
 ## Desarrollo
 

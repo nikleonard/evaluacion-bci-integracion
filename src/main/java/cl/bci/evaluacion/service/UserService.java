@@ -1,7 +1,5 @@
 package cl.bci.evaluacion.service;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 
 import cl.bci.evaluacion.exception.DuplicateEmailException;
@@ -11,13 +9,16 @@ import cl.bci.evaluacion.model.dto.UserResponseDTO;
 import cl.bci.evaluacion.model.entity.Phone;
 import cl.bci.evaluacion.model.entity.User;
 import cl.bci.evaluacion.repository.UserRepository;
+import cl.bci.evaluacion.util.JwtUtil;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     public UserResponseDTO registerUser(UserRequestDTO request) {
@@ -26,9 +27,8 @@ public class UserService {
             throw new DuplicateEmailException("El correo ya registrado");
         }
 
-        // generar token
-        // TODO: generar token JWT
-        String token = UUID.randomUUID().toString();
+        // Generar token JWT con claim de rol usuario
+        String token = jwtUtil.generateJWT(request.getEmail());
 
         // Crear usuario
         User user = User.builder()
